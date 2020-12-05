@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Projects on My website</title>
+    <link>/project/</link>
+    <description>Recent content in Projects on My website</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-US</language>
+    <lastBuildDate>Tue, 01 Dec 2020 00:00:00 +0000</lastBuildDate><atom:link href="/project/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Project 2</title>
+      <link>/project/project2/</link>
+      <pubDate>Tue, 01 Dec 2020 00:00:00 +0000</pubDate>
+      
+      <guid>/project/project2/</guid>
+      <description> Test Project 2  </description>
+    </item>
+    
+    <item>
+      <title>NBA Joined Dataset Analysis </title>
+      <link>/project/project1/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>/project/project1/</guid>
+      <description>library(tidyverse) library(&amp;quot;fivethirtyeight&amp;quot;, lib.loc = &amp;quot;~/R/x86_64-pc-linux-gnu-library/3.6&amp;quot;) NBABIOSTATS &amp;lt;- read_csv(&amp;quot;NBABIOSTATS5.csv&amp;quot;) NBABIOSTATS &amp;lt;- NBABIOSTATS %&amp;gt;% rename(college_3pt = college_3_point_percentage, college_ft = college_career_free_throw_percentage, nba_3pt = nba_career_3_point_percentage) For this project, I chose to combine the data I collected for my Biostatistics project with data from fivethirtyeight, a website that analyzes data for topics ranging from sports to politics. In my previous Biostatistics project, I collected data on the shooting percentages for basketball players during their careers in college and professional basketball.</description>
+    </item>
+    
+  </channel>
+</rss>
