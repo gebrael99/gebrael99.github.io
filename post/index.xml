@@ -6,16 +6,7 @@
     <description>Recent content in Posts on My website</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-US</language>
-    <lastBuildDate>Fri, 04 Dec 2020 00:00:00 +0000</lastBuildDate><atom:link href="/post/index.xml" rel="self" type="application/rss+xml" />
-    <item>
-      <title>Blog Post for fun</title>
-      <link>/post/2020/12/04/test-post/</link>
-      <pubDate>Fri, 04 Dec 2020 00:00:00 +0000</pubDate>
-      
-      <guid>/post/2020/12/04/test-post/</guid>
-      <description>Last Week of School Blog Post I did it, I managed to complete a really weird semester, and an even weirder year! Learning R and Python was one of my favorite parts of my year. Courses that will stick with me beyond the semester are so valuable, and I&#39;m excited to continue my coding journey next year. One of the recent things we learned was how to code Python within R markdown and how to share information between R and Python.</description>
-    </item>
-    
+    <lastBuildDate>Thu, 23 Jul 2015 21:13:14 -0500</lastBuildDate><atom:link href="/post/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>Hello R Markdown</title>
       <link>/post/2015/07/23/hello-r-markdown/</link>
