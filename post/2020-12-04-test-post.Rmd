@@ -1,5 +1,5 @@
 ---
-title: Test Post
+title: Blog Post for fun
 author: ''
 date: '2020-12-04'
 slug: test-post
@@ -7,20 +7,28 @@ categories: []
 tags: []
 description: ''
 ---
-# Heading of my post
-Content!
+# Last Week of School Blog Post
 
-```{r}
-hist(quakes$mag)
-```
+I did it, I managed to complete a really weird semester, and an even weirder year! Learning R and Python was one of my favorite parts of my year. Courses that will stick with me beyond the semester are so valuable, and I'm excited to continue my coding journey next year. One of the recent things we learned was how to code Python within R markdown and how to share information between R and Python. 
+
 ```{r}
 quakes <- quakes
 ```
-
+quakes is a dataset from R but it can be shared to Python to find the median depth of the earthquakes in the dataset
 ```{python}
-r.quakes.mag.mean()
-
+r.quakes.depth.median()
 ```
+
 <center>
 ![](/post/2020-12-04-test-post_files/image002.jpg){width=50%}
 </center>
+
+```{r}
+something<-"This Is"
+```
+
+```{python}
+dumb="Really Cool"
+print(r.something,dumb)
+```
+

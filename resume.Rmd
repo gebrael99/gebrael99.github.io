@@ -7,7 +7,48 @@ hidediscus: true
 ---
 
 <center>
-<object data="/resume.pdf" type="application/pdf" >
-<embed src="/resume.pdf" type="application/pdf" style="min-height:100vh;width:100%" />
 </object>
 </center>
+**Ryan Gebrael**
+
+**Email:** ryan.gebrael@gmail.com
+
+**Education:**
+University of Texas at Austin (2018 - Present)
+
+**Major:** Biology
+
+**Overall GPA:** 3.9880
+
+**Anticipated Graduation:** May 2022
+
+**Volunteering:**
+
+**Red Cross Blood Donor Ambassador** (October 2020 - Present)
+
+**Lighter Loads ATX** (November 2019)
+
+  • Shower trailer for homeless people 
+
+**Assia Village Camp Volunteering** (Summers 2017-2019)
+
+   • Distributing food to Syrian refugee families
+
+   • Cleaning houses for elderly people 
+**English tutor in Assia, Lebanon** (Summers 2016-2019)
+
+**Work:**
+
+**Cashier at supermarket in Lebanon** (Summers 2016 - 2019)
+
+**Skills:**
+
+Fast typer (67 WPM average) 
+
+Quick Learner
+
+Arabic as a second language
+
+ 
+
+
