@@ -1,8 +1,237 @@
 ---
-title: "Project 2"
-author: "Me"
-date: "2020-12-01"
+title: "Predicting Medical School Admissions"
+author: "Ryan Gebrael"
+date: "11/18/2020"
 output: html_document
 ---
 
-## Test Project 2
+```{r setup, include=FALSE}
+library(knitr)
+opts_chunk$set(fig.align="center", fig.height=5, message=FALSE, warning=FALSE, fig.width=8, tidy.opts=list(width.cutoff=60),tidy=TRUE)
+
+
+class_diag<-function(probs,truth){
+  tab<-table(factor(probs>.5,levels=c("FALSE","TRUE")),truth)
+  acc=sum(diag(tab))/sum(tab)
+  sens=tab[2,2]/colSums(tab)[2]
+  spec=tab[1,1]/colSums(tab)[1]
+  ppv=tab[2,2]/rowSums(tab)[2]
+  f1=2*(sens*ppv)/(sens+ppv)
+
+  if(is.numeric(truth)==FALSE & is.logical(truth)==FALSE){
+    truth<-as.numeric(truth)-1}
+  
+  
+  ord<-order(probs, decreasing=TRUE)
+  probs <- probs[ord]; truth <- truth[ord]
+  
+  TPR=cumsum(truth)/max(1,sum(truth)) 
+  FPR=cumsum(!truth)/max(1,sum(!truth))
+  
+  dup<-c(probs[-1]>=probs[-length(probs)], FALSE)
+  TPR<-c(0,TPR[!dup],1); FPR<-c(0,FPR[!dup],1)
+  
+  n <- length(TPR)
+  auc<- sum( ((TPR[-1]+TPR[-n])/2) * (FPR[-1]-FPR[-n]) )
+
+  data.frame(acc,sens,spec,ppv,f1,auc)
+}
+
+```
+
+After spending too much time researching admission statistics for various medical schools, I decided to use my time more wisely by exploring a medical school acceptance dataset for my next project. The dataset is titled "MedGPA", and includes information on 55 medical school applicants from a Midwest liberal arts college. The dataset includes 12 variables. Acceptance status is displayed both through letters (A for accepted and D for denied) and through binary  (1 for accepted and 0 for denied). MCAT score is included based on the old MCAT scoring system, and each MCAT subscore is also included (Verbal Reasoning, Phyiscal Sciences, Writing Sample, and Biological Sciences). GPA and Science GPA (BCPM Bio/Chem/Physics/Math GPA) were also included, as well as sex, number of medical schools applied to (Apps), and applicant number. Since the dataset was missing the MCAT Writing Sample susbscore for applicant #54, this applicant was removed from the dataset. Now the dataset contains 54 observations. 
+
+```{r}
+library(tidyverse)
+MedGPA <- read_csv("MedGPA.csv")
+MedGPA <- MedGPA %>% rename(Applicant = X1)
+MedGPA <- MedGPA[-54,]
+MedGPA
+```
+
+```{r}
+library(rstatix)
+group <- MedGPA$Accept 
+DVs <- MedGPA %>% select(GPA,BCPM,MCAT,Apps)
+sapply(split(DVs,group), mshapiro_test)
+```
+In order to perform a MANOVA, the data was tested to see if MANOVA assumptions were met. The multivariate normality for each group was tested using the Shapiro-Wilk test. For the subset of people who were accepted, the p-value from the test was 0.2073555. For the group of people who were denied admission, the p-value was 0.005305916, which means the null hypothesis is rejected and the multivariate normality assumption was violated. After testing the assumptions, the MANOVA was carried out testing if GPA, science GPA, MCAT score, and number of applications sent out experienced a mean difference based on whether an applicant was accepted or not. 
+
+```{r}
+manMedGPA<-manova(cbind(GPA,BCPM,MCAT,Apps)~Accept, data=MedGPA)
+summary(manMedGPA) 
+```
+The MANOVA resulted in a P-value of 0.0007833, suggesting that at least one of the numeric variables shows a mean difference based on admission status. To determine which numeric variables showed a mean difference based on admission status, four univariate ANOVAs were performed.
+
+```{r}
+summary.aov(manMedGPA)
+```
+The p-value for the ANOVA that tested the mean difference for number of applications submitted based on admission status was 0.642, and is evidence that the mean difference in number of applications submitted based on admission status is insignificant. For GPA (4.101e-05), BCPM (0.0001712), and MCAT (0.003051), the mean difference p-values were all significant. This is evidence that the mean difference for each of these factors is significant based on admission status. Since there were only two acceptance statuses there was no need to perform any post-hoc t-tests. 
+
+```{r}
+1-0.95^5
+0.05/5
+```
+One MANOVA and four univariate ANOVAS tests were performed, for a total of 5 tests. This means that the probability of at least one type-I error occuring is 1-0.95^5 = 0.2262191. The Bonferroni correction was applied to get a new significance value 0.05/5=0.01. This adjustment did not result in any different conclusions based on significance compared to the original conclusions that were made.
+
+```{r}
+rand_dist<-vector() 
+for(i in 1:5000){
+new<-data.frame(GPA=sample(MedGPA$GPA),Accept=MedGPA$Accept) 
+rand_dist[i]<-mean(new[new$Accept=="D",]$GPA)-   
+              mean(new[new$Accept=="A",]$GPA)} 
+
+MedGPA%>%group_by(Accept)%>%summarize(means=mean(GPA))%>%summarize(`mean_diff`=diff(means))
+
+mean(rand_dist>0.28375 | rand_dist< -0.28375) 
+{hist(rand_dist,main="",ylab="",xlim=c(-0.3,0.3)); abline(v = c(-0.28375, 0.28375),col="red")}  
+
+```
+A randomization test was performed to determine the mean difference in GPA based on admissions status, and to determine if this difference was significant. The null hypothesis was that the mean difference in GPA based on admission status was 0, and the alternative hypothesis was that the mean difference was not 0. The relationships between the variables were scrambled by randomizing the columns and generating a null distribution to compare against an observed test statistic. The mean difference subtracting admitted applicant GPAs from denied applicant GPAs was calculated to be -0.28375, and the calculated p-value was extremely small (2e-04), which means that the null hypothesis was rejected and the mean difference in GPA based on admission status was significant. A histogram was generated showing how far out the actual difference in mean GPA was from the distribution.
+
+```{r}
+library(sandwich); library(lmtest)
+MedGPA$GPA_c <- MedGPA$GPA - mean(MedGPA$GPA)
+fit<-lm(MCAT ~ Sex * GPA_c, data=MedGPA)
+summary(fit)
+ggplot(MedGPA, aes(GPA,MCAT,color=Sex)) + geom_smooth(method = "lm", se = F, fullrange = T)  + geom_point()
+```
+A linear regression model was create predicting the MCAT score based on sex and mean centered GPA (with interaction). Based on the regression, a female applicant with an average GPA is predicted to have an MCAT score of 36.1967. A male applicant with an average GPA is expected to score 0.8273 higher on the MCAT than a female applicant with an average GPA. Finally, the slope for GPA on MCAT score is 3.0174 less for males compared to females. The adjusted R-squared value for the fit was found to be 0.1693, meaning that 0.1693 of the variation in MCAT score is explained by the model. 
+
+```{r}
+resids<-fit$residuals
+fitvals<-fit$fitted.values
+ggplot()+geom_point(aes(fitvals,resids))+geom_hline(yintercept=0, color='red')
+
+ggplot()+geom_histogram(aes(resids), bins=20); qqnorm(resids); qqline(resids, col='red')
+
+ks.test(resids, "pnorm", mean=0, sd(resids))
+
+bptest(fit)
+```
+To check that the assumptions for a linear regression were met, a plot comparing the residuals to the fitted values was generated. This plot appeared to include data points that were generally randomly distributed, suggesting linearity. A plot with the distribution of the residuals was generated and the distribution appeared to be somewhat normal. A Q-Q plot was generated and appeared normal, and a Kolmogorov-Smirnov test was performed and resulted in a p-value of 0.9137. This p-value means we fail to reject the null hypothesis of normality in the residuals. The regression plot did not show a fanning pattern, and a Breusch-Pagan test to assess homoskedasticity resulted in a p-value of 0.4634, meaning the data was homoskedastic and the variances were equal throughout the model. All of the main assumptions for a linear regression appeared to be met. 
+
+```{r}
+coeftest(fit, vcov=vcovHC(fit)) 
+```
+Recomputing the regression using robust standard errors resulted in the calculation of larger standard errors for each coefficient, and larger p-values. Overall, this did not cause any significant change. 
+
+```{r}
+samp_distn<-replicate(5000, {
+  boot_dat<-MedGPA %>% sample_frac(replace=TRUE)
+  fit<-lm(MCAT ~ Sex * GPA_c, data=boot_dat)
+  coef(fit)
+})
+
+samp_distn%>%t%>%as.data.frame%>%summarize_all(sd)
+```
+The regression was then rerun using bootstrapped standard errors by resampling the observations. The standard error for SexM decreased very slightly compared to the original sample, meaning the p-value likely decreased. The standard error for GPA_c and the standard error for the interaction between SexM and GPA_c increased, meaning the p-value for each of these increased.
+
+```{r}
+MedGPA$MCAT_c <- MedGPA$MCAT - mean(MedGPA$MCAT) 
+fit<-glm(Acceptance~GPA_c+MCAT_c, data=MedGPA, family="binomial")
+
+coeftest(fit)
+exp(coef(fit))
+```
+A logistic regression was created predicting acceptance (a binary variable) based on mean centered GPA and mean centered MCAT score. The odds of acceptance for someone with an average GPA and MCAT score are 1.393455. Controlling for MCAT score, a GPA increase of 1 increases the odds of acceptance by a factor of 107.08, which is a significant difference. Controlling for GPA, an MCAT score increase of 1 increases the odds of acceptance by a factor of 1.18, which is not a significant difference. 
+
+```{r}
+MedGPA$prob <- predict(fit,type="response")
+MedGPA$predicted <- ifelse(MedGPA$prob>.5,"A","D")
+table(truth=MedGPA$Accept, prediction=MedGPA$predicted)%>%addmargins
+
+prob <- predict(fit,type="response")
+class_diag(prob,MedGPA$Acceptance) 
+
+library(plotROC)
+ROCplot<-ggplot(MedGPA)+geom_roc(aes(d=Acceptance,m=GPA_c+MCAT_c,A=1), n.cuts=0)
+ROCplot
+calc_auc(ROCplot)
+
+```
+A confusion matrix was generated for the logistic regression by comparing the true acceptances to the acceptances that were predicted by the model. The accuracy (proportion of correctly predicted cases) of the model was calculated to be 0.7407407, the sensitivity (proportion of correctly predicted acceptances) was calculated to be 0.7666667, the specificity (proportion of correctly predicted rejections) was 0.7083333, the precision (proportion of predicted acceptances who were actualy accepted) was 0.7666667, and the auc was 0.8277778. Next a ROC curve was generated and the auc (area under the curve) was calculated to be 0.7472222, suggesting that the model is a fair fit for the data. 
+
+```{r}
+MedGPA$logit<-predict(fit) 
+MedGPA %>% mutate(Accept=factor(Accept,levels=c("D","A"))) %>% ggplot(aes(logit,fill=Accept))+geom_density(alpha=.5)+geom_vline(xintercept=0,lty=2)
+```
+The logit scores were plotted for the two acceptance statuses to visualize the data that was classified correctly compared to what was misclassified. 
+
+```{r}
+fit<-glm(Acceptance~GPA+Sex+BCPM+Apps+BS+PS+WS+VR, data=MedGPA, family="binomial")
+coeftest(fit)
+MedGPA$prob <- predict(fit,type="response")
+
+MedGPA$predicted <- ifelse(MedGPA$prob>.5,"A","D")
+table(truth=MedGPA$Accept, prediction=MedGPA$predicted)%>%addmargins
+prob <- predict(fit,type="response")
+class_diag(prob,MedGPA$Acceptance) 
+```
+Next, a logistic regression was created predicting acceptance based on GPA, Science GPA, each of the MCAT subscores, Sex, and the number of applications submitted. A significant p-value was generated for three of the MCAT subscores, BS, PS, and WS. The accuracy of the model was calculated to be 0.8888889, the sensitivity was calculated to be 0.9, the specificity was 0.875, the precision was 0.9, and the auc was 0.95, suggesting the model was a great fit.
+
+```{r}
+set.seed(1234)
+k=10
+data<-MedGPA[sample(nrow(MedGPA)),] 
+folds<-cut(seq(1:nrow(MedGPA)),breaks=k,labels=F) 
+
+diags<-NULL
+for(i in 1:k){
+  
+  train<-data[folds!=i,] 
+  test<-data[folds==i,]
+  
+  truth<-test$Acceptance 
+  
+  
+  fit<-glm(Acceptance~GPA+Sex+BCPM+Apps+BS+PS+WS+VR, data=MedGPA, family="binomial")
+  
+  
+  probs<-predict(fit,newdata = test,type="response")
+  
+  
+  diags<-rbind(diags,class_diag(probs,truth))
+}
+
+summarize_all(diags,mean)
+```
+A 10-fold cross validation to test how well the model performs on new data. The data was split into two parts and the model was fit to one part and tested on the other part, doing this multiple times to measure the average performance of the model. The accuracy of the model was calculated to be 0.8933333, the sensitivity was calculated to be 0.8916667, the specificity was 0.8966667, the precision was 0.88, and the auc was 0.9722222, suggesting the model was a great fit. The auc from the cross validation was slightly higher than the auc from the initial regression. The model appears to do well at making predictions on new data. 
+
+```{r}
+library(glmnet)
+y<-as.matrix(MedGPA$Acceptance) #grab response
+x<-model.matrix(Acceptance~.,data=MedGPA)[,-c(1,2,3,13,14,15,16,17)] 
+cv<-cv.glmnet(x,y,family="binomial")
+lasso<-glmnet(x,y,family="binomial",lambda=cv$lambda.1se)
+coef(lasso)
+```
+LASSO was performed on the model and the variables that were always retained were GPA and BS (the Behavioral Science subscore of the MCAT).
+
+```{r}
+set.seed(1234)
+k=10 
+data<-MedGPA[sample(nrow(MedGPA)),] 
+folds<-cut(seq(1:nrow(MedGPA)),breaks=k,labels=F) 
+
+diags<-NULL
+for(i in 1:k){
+  
+  train<-data[folds!=i,] 
+  test<-data[folds==i,]
+  
+  truth<-test$Acceptance
+  
+  
+  fit<-glm(Acceptance~GPA+BS, data=MedGPA, family="binomial")
+  
+  
+  probs<-predict(fit,newdata = test,type="response")
+  
+  
+  diags<-rbind(diags,class_diag(probs,truth))
+}
+
+summarize_all(diags,mean)
+```
+The 10-fold cross validation was repeated, this time using only the variables that were selected by LASSO (GPA and BS). The out-of-sample AUC was calculated to be 0.8736111, which is lower than the previous AUC calculations for the logistic models but regardless it suggests that this model is a good fit.  
