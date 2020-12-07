@@ -16,16 +16,5 @@
       <description>Last Week of School Blog Post I did it, I managed to complete a really weird semester, and an even weirder year! Learning R and Python was one of my favorite parts of my year. Courses that will stick with me beyond the semester are so valuable, and I&#39;m excited to continue my coding journey next year. One of the recent things we learned was how to code Python within R markdown and how to share information between R and Python.</description>
     </item>
     
-    <item>
-      <title>Hello R Markdown</title>
-      <link>/post/2015/07/23/hello-r-markdown/</link>
-      <pubDate>Thu, 23 Jul 2015 21:13:14 -0500</pubDate>
-      
-      <guid>/post/2015/07/23/hello-r-markdown/</guid>
-      <description>R Markdown This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see http://rmarkdown.rstudio.com.
-You can embed an R code chunk like this:
-summary(cars) ## speed dist ## Min. : 4.0 Min. : 2.00 ## 1st Qu.:12.0 1st Qu.: 26.00 ## Median :15.0 Median : 36.00 ## Mean :15.4 Mean : 42.98 ## 3rd Qu.</description>
-    </item>
-    
   </channel>
 </rss>
