@@ -60,7 +60,7 @@
  
 <div class="blog-title">
           <h4>
-         January 1, 0001 
+         November 18, 2020 
             &nbsp;&nbsp;
             
           </h4>
@@ -154,7 +154,7 @@ MedGPA %&gt;% group_by(Accept) %&gt;% summarize(means = mean(GPA)) %&gt;%
 ##       &lt;dbl&gt;
 ## 1    -0.284</code></pre>
 <pre class="r"><code>mean(rand_dist &gt; 0.28375 | rand_dist &lt; -0.28375)</code></pre>
-<pre><code>## [1] 2e-04</code></pre>
+<pre><code>## [1] 0</code></pre>
 <pre class="r"><code>{
     hist(rand_dist, main = &quot;&quot;, ylab = &quot;&quot;, xlim = c(-0.3, 0.3))
     abline(v = c(-0.28375, 0.28375), col = &quot;red&quot;)
@@ -232,7 +232,7 @@ qqline(resids, col = &quot;red&quot;)</code></pre>
 
 samp_distn %&gt;% t %&gt;% as.data.frame %&gt;% summarize_all(sd)</code></pre>
 <pre><code>##   (Intercept)     SexM    GPA_c SexM:GPA_c
-## 1   0.6795803 1.031741 3.287749   4.315233</code></pre>
+## 1    0.656757 1.018496 3.270398   4.174336</code></pre>
 <p>The regression was then rerun using bootstrapped standard errors by resampling the observations. The standard error for SexM decreased very slightly compared to the original sample, meaning the p-value likely decreased. The standard error for GPA_c and the standard error for the interaction between SexM and GPA_c increased, meaning the p-value for each of these increased.</p>
 <pre class="r"><code>MedGPA$MCAT_c &lt;- MedGPA$MCAT - mean(MedGPA$MCAT)
 fit &lt;- glm(Acceptance ~ GPA_c + MCAT_c, data = MedGPA, family = &quot;binomial&quot;)
