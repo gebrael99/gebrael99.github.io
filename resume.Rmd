@@ -6,9 +6,8 @@ hiderelated: true
 hidediscus: true
 ---
 
-<center>
-</object>
-</center>
+<iframe src="/resume.pdf" width="100%" height="800" border="0"></iframe>
+
 **Ryan Gebrael**
 
 **Email:** ryan.gebrael@gmail.com
@@ -35,6 +34,7 @@ University of Texas at Austin (2018 - Present)
    • Distributing food to Syrian refugee families
 
    • Cleaning houses for elderly people 
+   
 **English tutor in Assia, Lebanon** (Summers 2016-2019)
 
 **Work:**
